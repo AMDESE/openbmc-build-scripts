@@ -88,7 +88,7 @@ ENV_LOCAL_CONF=${ENV_LOCAL_CONF:-""}
 # Docker Image Build Variables:
 build_dir=${build_dir:-${WORKSPACE}/build}
 distro=${distro:-ubuntu}
-img_tag=${img_tag:-20.04}
+img_tag=${img_tag:-22.04}
 target=${target:-qemuarm}
 no_tar=${no_tar:-false}
 nice_priority=${nice_priority:-}
@@ -244,6 +244,52 @@ elif [[ "${distro}" == ubuntu ]]; then
           chrpath \
           locales \
           diffstat"
+    elif [[ "${img_tag}" == 20.04 ]]; then
+        PACKAGES=" \
+          build-essential \
+          chrpath \
+          cpio \
+          debianutils \
+          diffstat \
+          file \
+          gawk \
+          git \
+          iputils-ping \
+          libdata-dumper-simple-perl \
+          liblz4-tool \
+          libsdl1.2-dev \
+          libthread-queue-any-perl \
+          locales \
+          python3 \
+          socat \
+          subversion \
+          texinfo \
+          vim \
+          wget \
+          zstd"
+    elif [[ "${img_tag}" == 22.04 ]]; then
+        PACKAGES=" \
+          # build-essential \
+          chrpath \
+          cpio \
+          debianutils \
+          diffstat \
+          file \
+          gawk \
+          git \
+          iputils-ping \
+          libdata-dumper-simple-perl \
+          liblz4-tool \
+          libsdl1.2-dev \
+          libthread-queue-any-perl \
+          locales \
+          python3 \
+          socat \
+          subversion \
+          texinfo \
+          vim \
+          wget \
+          zstd"
     else
         PACKAGES=" \
           build-essential \
@@ -279,6 +325,42 @@ elif [[ "${distro}" == ubuntu ]]; then
 
   RUN apt-get update && apt-get install -yy \
     ${PACKAGES}
+
+  RUN apt update && apt install -y \
+    git \
+    python3-distutils \
+    gcc-9 \
+    g++-9 \
+    make \
+    file \
+    wget \
+    gawk \
+    diffstat \
+    bzip2 \
+    cpio \
+    chrpath \
+    zstd \
+    lz4 \
+    bzip2 \ 
+    iputils-ping \
+    vim \ 
+    sudo \
+    software-properties-common \
+    tzdata \ 
+    locales
+
+  # Set GCC 9.5 as the default GCC version
+  RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 \
+      --slave /usr/bin/g++ g++ /usr/bin/g++-9 \
+      --slave /usr/bin/cpp cpp /usr/bin/cpp-9
+
+  # Add deadsnakes PPA to install Python 3.9
+  RUN add-apt-repository ppa:deadsnakes/ppa && \
+      apt update && \
+      apt install -y python3.9 python3.9-venv python3.9-dev
+
+  # Set Python 3.9 as the default Python version
+  RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 
 
   # Set the locale
   RUN locale-gen en_US.UTF-8
@@ -417,8 +499,8 @@ EOF_SCRIPT
 chmod a+x "${WORKSPACE}/build.sh"
 
 # Give the Docker image a name based on the distro,tag,arch,and target
-img_name=${img_name:-openbmc/${distro}:${img_tag}-${target}-${ARCH}}
-
+# img_name=${img_name:-openbmc/${distro}:${img_tag}-${target}-${ARCH}}
+img_name=${img_name:-docker-virtual.mkmartifactory.amd.com/amd/mi300/openbmc/${distro}-${img_tag}}
 # Ensure appropriate docker build output to see progress and identify
 # any issues
 export BUILDKIT_PROGRESS=plain
