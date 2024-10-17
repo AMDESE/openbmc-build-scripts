@@ -369,6 +369,9 @@ elif [[ "${distro}" == ubuntu ]]; then
   ENV LC_ALL en_US.UTF-8
 
   RUN mkdir -p ${HOME}
+  RUN mkdir -p /var/cache/bitbake
+  RUN mkdir -p /var/cache/bitbake/downloads
+  RUN mkdir -p /var/cache/bitbake/sstate
   RUN grep -q ${GROUPS[0]} /etc/group || groupadd -g ${GROUPS[0]} ${USER}
   RUN grep -q ${UID} /etc/passwd || useradd -d ${HOME} -m -u ${UID} -g ${GROUPS[0]} ${USER}
 
