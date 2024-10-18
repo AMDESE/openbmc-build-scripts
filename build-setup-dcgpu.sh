@@ -88,7 +88,7 @@ ENV_LOCAL_CONF=${ENV_LOCAL_CONF:-""}
 # Docker Image Build Variables:
 build_dir=${build_dir:-${WORKSPACE}/build}
 distro=${distro:-ubuntu}
-img_tag=${img_tag:-22.04}
+img_tag=${img_tag:-24.04}
 target=${target:-qemuarm}
 no_tar=${no_tar:-false}
 nice_priority=${nice_priority:-}
@@ -290,6 +290,29 @@ elif [[ "${distro}" == ubuntu ]]; then
           vim \
           wget \
           zstd"
+    elif [[ "${img_tag}" == 24.04 ]]; then
+        PACKAGES=" \
+          # build-essential \
+          chrpath \
+          cpio \
+          debianutils \
+          diffstat \
+          file \
+          gawk \
+          git \
+          iputils-ping \
+          libdata-dumper-simple-perl \
+          liblz4-tool \
+          libsdl1.2-dev \
+          libthread-queue-any-perl \
+          locales \
+          python3 \
+          socat \
+          subversion \
+          texinfo \
+          vim \
+          wget \
+          zstd"
     else
         PACKAGES=" \
           build-essential \
@@ -326,9 +349,12 @@ elif [[ "${distro}" == ubuntu ]]; then
   RUN apt-get update && apt-get install -yy \
     ${PACKAGES}
 
-  RUN apt update && apt install -y \
+  RUN apt-get update && apt-get install -y software-properties-common && \
+    add-apt-repository universe
+
+  RUN apt-get update && apt-get install -y \
     git \
-    python3-distutils \
+    python3-distutils-extra \
     gcc-9 \
     g++-9 \
     make \
@@ -356,8 +382,8 @@ elif [[ "${distro}" == ubuntu ]]; then
 
   # Add deadsnakes PPA to install Python 3.9
   RUN add-apt-repository ppa:deadsnakes/ppa && \
-      apt update && \
-      apt install -y python3.9 python3.9-venv python3.9-dev
+      apt-get update && \
+      apt-get install -y python3.9 python3.9-venv python3.9-dev
 
   # Set Python 3.9 as the default Python version
   RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 
