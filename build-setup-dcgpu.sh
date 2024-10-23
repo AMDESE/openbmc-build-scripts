@@ -134,12 +134,6 @@ esac
 # Timestamp for job
 echo "Build started, $(date)"
 
-# If the obmc_dir directory doesn't exist clone it in
-# if [ ! -d "${obmc_dir}" ]; then
-#     echo "Clone in openbmc master to ${obmc_dir}"
-#     git clone https://github.com/openbmc/openbmc "${obmc_dir}"
-# fi
-
 if [[ "$target" = repotest ]]; then
     DOCKER_IMAGE_NAME=$(./scripts/build-unit-test-docker)
     docker run --cap-add=sys_admin --rm=true \
@@ -270,6 +264,9 @@ elif [[ "${distro}" == ubuntu ]]; then
           wget \
           zstd"
     elif [[ "${img_tag}" == 22.04 ]]; then
+        # The following packages came from:
+        # 1. openbmc repository (https://github.com/openbmc/openbmc?tab=readme-ov-file#ubuntu)
+        # 2. required for downgrades to build OpenBMC 2.11.0 (https://github.com/openbmc/openbmc/releases/tag/2.11.0)
         PACKAGES=" \
           chrpath \
           cpio \
