@@ -88,7 +88,7 @@ ENV_LOCAL_CONF=${ENV_LOCAL_CONF:-""}
 # Docker Image Build Variables:
 build_dir=${build_dir:-${WORKSPACE}/build}
 distro=${distro:-ubuntu}
-img_tag=${img_tag:-20.04}
+img_tag=${img_tag:-22.04}
 target=${target:-qemuarm}
 no_tar=${no_tar:-false}
 nice_priority=${nice_priority:-}
@@ -133,12 +133,6 @@ esac
 
 # Timestamp for job
 echo "Build started, $(date)"
-
-# If the obmc_dir directory doesn't exist clone it in
-if [ ! -d "${obmc_dir}" ]; then
-    echo "Clone in openbmc master to ${obmc_dir}"
-    git clone https://github.com/openbmc/openbmc "${obmc_dir}"
-fi
 
 if [[ "$target" = repotest ]]; then
     DOCKER_IMAGE_NAME=$(./scripts/build-unit-test-docker)
@@ -226,6 +220,8 @@ elif [[ "${distro}" == ubuntu ]]; then
         PROXY="RUN echo \"Acquire::http::Proxy \\"\"${http_proxy}/\\"\";\" > /etc/apt/apt.conf.d/000apt-cacher-ng-proxy"
     fi
 
+    UBUNTU22_DOWNGRADES=""
+
     if [[ "${img_tag}" == 18.04 ]]; then
         PACKAGES=" \
           build-essential \
@@ -244,6 +240,77 @@ elif [[ "${distro}" == ubuntu ]]; then
           chrpath \
           locales \
           diffstat"
+    elif [[ "${img_tag}" == 20.04 ]]; then
+        PACKAGES=" \
+          build-essential \
+          chrpath \
+          cpio \
+          debianutils \
+          diffstat \
+          file \
+          gawk \
+          git \
+          iputils-ping \
+          libdata-dumper-simple-perl \
+          liblz4-tool \
+          libsdl1.2-dev \
+          libthread-queue-any-perl \
+          locales \
+          python3 \
+          socat \
+          subversion \
+          texinfo \
+          vim \
+          wget \
+          zstd"
+    elif [[ "${img_tag}" == 22.04 ]]; then
+        # The following packages came from:
+        # 1. openbmc repository (https://github.com/openbmc/openbmc?tab=readme-ov-file#ubuntu)
+        # 2. required for downgrades to build OpenBMC 2.11.0 (https://github.com/openbmc/openbmc/releases/tag/2.11.0)
+        PACKAGES=" \
+          chrpath \
+          cpio \
+          debianutils \
+          diffstat \
+          file \
+          gawk \
+          git \
+          iputils-ping \
+          libdata-dumper-simple-perl \
+          liblz4-tool \
+          libsdl1.2-dev \
+          libthread-queue-any-perl \
+          locales \
+          python3 \
+          socat \
+          subversion \
+          texinfo \
+          vim \
+          wget \
+          zstd \
+          python3-distutils \
+          gcc-9 \
+          g++-9 \
+          make \
+          bzip2 \
+          lz4 \
+          sudo \
+          software-properties-common \
+          tzdata"
+
+        UBUNTU22_DOWNGRADES="\
+          # Set GCC 9.5 as the default GCC version 
+          RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 \
+              --slave /usr/bin/g++ g++ /usr/bin/g++-9 \
+              --slave /usr/bin/cpp cpp /usr/bin/cpp-9 
+
+          # Add deadsnakes PPA to install Python 3.9 
+          RUN add-apt-repository ppa:deadsnakes/ppa && \
+              apt update && \
+              apt install -y python3.9 python3.9-venv python3.9-dev 
+
+          # Set Python 3.9 as the default Python version 
+          RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1"
     else
         PACKAGES=" \
           build-essential \
@@ -279,7 +346,9 @@ elif [[ "${distro}" == ubuntu ]]; then
 
   RUN apt-get update && apt-get install -yy \
     ${PACKAGES}
-
+  
+  ${UBUNTU22_DOWNGRADES}
+  
   # Set the locale
   RUN locale-gen en_US.UTF-8
   ENV LANG en_US.UTF-8
@@ -417,8 +486,8 @@ EOF_SCRIPT
 chmod a+x "${WORKSPACE}/build.sh"
 
 # Give the Docker image a name based on the distro,tag,arch,and target
-img_name=${img_name:-openbmc/${distro}:${img_tag}-${target}-${ARCH}}
-
+# img_name=${img_name:-openbmc/${distro}:${img_tag}-${target}-${ARCH}}
+img_name=${img_name:-docker-virtual.mkmartifactory.amd.com/amd/mi300/openbmc/${distro}-${img_tag}}
 # Ensure appropriate docker build output to see progress and identify
 # any issues
 export BUILDKIT_PROGRESS=plain
