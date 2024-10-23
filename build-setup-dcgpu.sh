@@ -271,7 +271,6 @@ elif [[ "${distro}" == ubuntu ]]; then
           zstd"
     elif [[ "${img_tag}" == 22.04 ]]; then
         PACKAGES=" \
-          # build-essential \
           chrpath \
           cpio \
           debianutils \
@@ -302,18 +301,18 @@ elif [[ "${distro}" == ubuntu ]]; then
           software-properties-common \
           tzdata"
 
-          UBUNTU22_DOWNGRADES="\
-          # Set GCC 9.5 as the default GCC version \
+        UBUNTU22_DOWNGRADES="\
+          # Set GCC 9.5 as the default GCC version 
           RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 \
               --slave /usr/bin/g++ g++ /usr/bin/g++-9 \
               --slave /usr/bin/cpp cpp /usr/bin/cpp-9 
 
-          # Add deadsnakes PPA to install Python 3.9 \
+          # Add deadsnakes PPA to install Python 3.9 
           RUN add-apt-repository ppa:deadsnakes/ppa && \
               apt update && \
               apt install -y python3.9 python3.9-venv python3.9-dev 
 
-          # Set Python 3.9 as the default Python version \
+          # Set Python 3.9 as the default Python version 
           RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1"
     else
         PACKAGES=" \
@@ -350,11 +349,7 @@ elif [[ "${distro}" == ubuntu ]]; then
 
   RUN apt-get update && apt-get install -yy \
     ${PACKAGES}
-
-  # This installation block is necessary for locale-gen to work with ubuntu 22
-  RUN apt update && apt install -y \
-    locales
-
+  
   ${UBUNTU22_DOWNGRADES}
   
   # Set the locale
