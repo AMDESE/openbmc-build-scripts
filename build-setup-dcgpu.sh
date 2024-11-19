@@ -296,7 +296,8 @@ elif [[ "${distro}" == ubuntu ]]; then
           lz4 \
           sudo \
           software-properties-common \
-          tzdata"
+          tzdata \
+          zip"
 
         UBUNTU22_DOWNGRADES="\
           # Set GCC 9.5 as the default GCC version 
@@ -307,7 +308,7 @@ elif [[ "${distro}" == ubuntu ]]; then
           # Add deadsnakes PPA to install Python 3.9 
           RUN add-apt-repository ppa:deadsnakes/ppa && \
               apt update && \
-              apt install -y python3.9 python3.9-venv python3.9-dev 
+              apt install -y python3.9 python3.9-venv python3.9-dev python3-pip
 
           # Set Python 3.9 as the default Python version 
           RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1"
