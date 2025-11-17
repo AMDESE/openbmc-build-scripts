@@ -241,11 +241,13 @@ packages = {
         ],
     ),
     "openbmc/phosphor-dbus-interfaces": PackageDef(
+        rev="9ca8d347eddb12250a17ddbdff9e52de92f8d7e9",
         depends=["openbmc/sdbusplus"],
         build_type="meson",
         config_flags=["-Dgenerate_md=false"],
     ),
     "openbmc/phosphor-logging": PackageDef(
+        rev="91f6d3a57420621b035308b2cb8213be84bc93f2",
         depends=[
             "USCiLab/cereal",
             "openbmc/phosphor-dbus-interfaces",
@@ -259,6 +261,7 @@ packages = {
         ],
     ),
     "openbmc/phosphor-objmgr": PackageDef(
+        rev="1e3f7810c7e19008283937ab12a69fdce0d2df8c",
         depends=[
             "CLIUtils/CLI11",
             "boost",
@@ -279,6 +282,7 @@ packages = {
         ],
     ),
     "openbmc/libpldm": PackageDef(
+        rev="59edcb14c996fd701e3065e3e9106bedc2d3befb",
         build_type="meson",
         config_flags=[
             "-Dabi=deprecated,stable",
@@ -287,6 +291,7 @@ packages = {
         ],
     ),
     "openbmc/sdbusplus": PackageDef(
+        rev="94beff8b037dc80f4df0e24af70c9a2f44a52b47",
         depends=[
             "nlohmann/json",
         ],
